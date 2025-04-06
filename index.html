@@ -12,6 +12,7 @@
       align-items: center;
       justify-content: center;
       perspective: 1000px;
+      overflow: hidden;
     }
 
     .scene {
@@ -19,20 +20,22 @@
       height: 200px;
       position: relative;
       transform-style: preserve-3d;
-      animation: rotate 10s linear infinite;
+      cursor: grab;
+      transition: transform 0.1s ease-out;
     }
 
     .face {
       position: absolute;
       width: 200px;
       height: 200px;
-      background: rgba(255, 255, 255, 0.1);
-      border: 2px solid #0ff;
+      background: linear-gradient(45deg, #ff66b2, #ff1f88); /* Pink gradient */
+      border: 2px solid #ff3399;
       display: flex;
       align-items: center;
       justify-content: center;
       font-size: 32px;
-      color: #0ff;
+      color: #fff;
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
     }
 
     .front  { transform: rotateY(  0deg) translateZ(100px); }
@@ -41,15 +44,10 @@
     .left   { transform: rotateY(-90deg) translateZ(100px); }
     .top    { transform: rotateX( 90deg) translateZ(100px); }
     .bottom { transform: rotateX(-90deg) translateZ(100px); }
-
-    @keyframes rotate {
-      from { transform: rotateX(0) rotateY(0); }
-      to   { transform: rotateX(360deg) rotateY(360deg); }
-    }
   </style>
 </head>
 <body>
-  <div class="scene">
+  <div class="scene" id="scene">
     <div class="face front">1</div>
     <div class="face back">2</div>
     <div class="face right">3</div>
@@ -57,5 +55,34 @@
     <div class="face top">5</div>
     <div class="face bottom">6</div>
   </div>
+
+  <script>
+    const scene = document.getElementById('scene');
+    let isDragging = false;
+    let startX, startY, initialX, initialY;
+
+    scene.addEventListener('mousedown', (e) => {
+      isDragging = true;
+      startX = e.clientX;
+      startY = e.clientY;
+      initialX = scene.style.transform.match(/rotateX\((-?\d+)deg\)/) ? parseInt(scene.style.transform.match(/rotateX\((-?\d+)deg\)/)[1]) : 0;
+      initialY = scene.style.transform.match(/rotateY\((-?\d+)deg\)/) ? parseInt(scene.style.transform.match(/rotateY\((-?\d+)deg\)/)[1]) : 0;
+      scene.style.cursor = 'grabbing';
+    });
+
+    window.addEventListener('mousemove', (e) => {
+      if (isDragging) {
+        let deltaX = e.clientX - startX;
+        let deltaY = e.clientY - startY;
+
+        scene.style.transform = `rotateX(${initialX - deltaY}deg) rotateY(${initialY + deltaX}deg)`;
+      }
+    });
+
+    window.addEventListener('mouseup', () => {
+      isDragging = false;
+      scene.style.cursor = 'grab';
+    });
+  </script>
 </body>
 </html>
